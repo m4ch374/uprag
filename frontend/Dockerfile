@@ -1,9 +1,9 @@
-# using 22 bc i fear 23 is gonna break something
+# lets keep it safe and use 22
 FROM node:22
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 RUN npm install
 
