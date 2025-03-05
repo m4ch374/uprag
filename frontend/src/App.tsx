@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import './App.css'
 import { Button } from './components/ui/button'
 
-function App() {
+const App = () => {
   const [count, setCount] = useState(0)
 
   return (
-    <>
+    <div className='dark'>
       <Button>hihihihi</Button>
       <h1>Vite + React</h1>
-      <div className="card">
+      <div>
         <button onClick={() => setCount((count) => count + 1)}>
           count is {count}
         </button>
@@ -17,10 +16,10 @@ function App() {
           Edit <code>src/App.tsx</code> and save to test HMR
         </p>
       </div>
-      <p className="read-the-docs">
+      <p>
         Click on the Vite and React logos to learn more
       </p>
-    </>
+    </div>
   )
 }
 
