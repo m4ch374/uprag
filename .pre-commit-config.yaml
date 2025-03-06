@@ -1,0 +1,59 @@
+repos:
+  # default checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        exclude: backend/app/voice/streaming/synthesizer/filler_audio/|backend/app/nltk_data/|frontend/public/|backend/app/voice/streaming/output_device/background_noise/|backend/app/utils/turn_detector_model/
+  # black format check
+  - repo: https://github.com/psf/black
+    # =================================================
+    # Backendland
+
+    rev: 24.4.2 # Specify the version of Black you want to use
+    hooks:
+      - id: black
+        files: backend/.*\.py$
+        language_version: python3 # Specify the Python version
+  # pylint check
+  - repo: https://github.com/pre-commit/mirrors-pylint
+    rev: v3.0.0a5 # Ensure this is the version you want to use
+    hooks:
+      - id: pylint
+        files: backend/.*\.py$
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        exclude: backend/app/voice/
+        args:
+          - "--rcfile=./backend/.pylintrc"
+  # =================================================
+  # Frontendland
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    # =================================================
+
+    rev: v9.6.0
+    hooks:
+      - id: eslint
+        files: frontend/.*\.tsx?$
+        types: [file]
+        args: [--config, ./frontend/eslint.config.js, "--fix"]
+        language_version: "22.4.1"
+        additional_dependencies:
+          # generated with:
+          # npm list | sed -nE "s/^(├──|└──) (.*eslint.*$)/- \"\2\"/p"
+          # - "@eslint/js@9.21.0"
+          - "@typescript-eslint/parser@8.26.0"
+          - "eslint-config-prettier@10.0.2"
+          - "eslint-plugin-prettier@5.2.3"
+          - "eslint-plugin-react-hooks@5.2.0"
+          - "eslint-plugin-react-refresh@0.4.19"
+          - "eslint-plugin-react@7.37.4"
+          - "eslint@9.21.0"
+          - "typescript-eslint@8.26.0"
+
+# =================================================
