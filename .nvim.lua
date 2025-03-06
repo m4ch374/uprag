@@ -15,3 +15,10 @@ lspconfig.pyright.setup({
 		},
 	},
 })
+
+-- eslint
+local eslint = lint.linters.eslint_d
+new_args = { "--config", "./frontend/eslint.config.js" }
+for _, item in ipairs(new_args) do
+	table.insert(eslint.args, item)
+end
