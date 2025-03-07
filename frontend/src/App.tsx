@@ -1,24 +1,27 @@
 import React from "react";
-import { useState } from "react";
-import { Button } from "./components/ui/button";
+import { Navigate, Route, Routes } from "react-router";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
+import HomePage from "./pages/HomePage";
+import { useUser } from "@clerk/clerk-react";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 
+// no lazy load yolo
 const App: React.FC = () => {
-  const [count, setCount] = useState(0);
+  const { isSignedIn } = useUser();
 
   return (
-    <div className="dark">
-      <Button>hihihihi</Button>
-      <h1>Vite + React</h1>
-      <div>
-        <button onClick={() => setCount(count => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p>Click on the Vite and React logos to learn more</p>
-    </div>
+    <Routes>
+      <Route
+        path="/"
+        element={isSignedIn ? <Navigate to="/chat" /> : <HomePage />}
+      />
+      <Route path="/sign-in" element={<SignInPage />} />
+      <Route path="/sign-up" element={<SignUpPage />} />
+      <Route element={<ProtectedRoutes />}>
+        <Route path="/chat" element={<h1>Welcome to chat</h1>} />
+      </Route>
+    </Routes>
   );
 };
 
