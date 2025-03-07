@@ -1,23 +1,13 @@
-import {
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  UserButton,
-} from "@clerk/clerk-react";
 import React from "react";
+import { Route, Routes } from "react-router";
 
 const App: React.FC = () => {
   return (
-    <div className="dark">
-      <header>
-        <SignedOut>
-          <SignInButton />
-        </SignedOut>
-        <SignedIn>
-          <UserButton />
-        </SignedIn>
-      </header>
-    </div>
+    <Routes>
+      <Route path="/" element={<h1>Hello World</h1>} />
+      <Route path="/sign-in" element={<h1>Sign In</h1>} />
+      <Route path="/sign-up" element={<h1>Sign Up</h1>} />
+    </Routes>
   );
 };
 
