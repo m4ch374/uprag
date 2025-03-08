@@ -11,3 +11,8 @@ class GeneralErrorMessages:
 class AuthErrorMessages:
     INVALID_CREDENTIALS = "Invalid credentials"
     USER_ALREADY_EXISTS = "User already exists"
+
+
+@dataclass
+class KnowledgeErrorMessages:
+    INVALID_FILE_TYPE = "Invalid file type"
