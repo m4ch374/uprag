@@ -15,11 +15,10 @@ const OnboardingPage: React.FC = () => {
 
   const onboard = useOnboard(token, {
     onSuccess: () => void navigate("/chat"),
-    onError: async e => {
+    onError: async () => {
       await signOut();
       queryClient.clear();
       await navigate("/");
-      console.log(e);
     },
   });
 
