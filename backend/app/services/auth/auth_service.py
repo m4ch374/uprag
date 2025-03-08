@@ -2,10 +2,11 @@ import logging
 
 from fastapi import HTTPException, status
 
+from schemas.common_schema import SuccessOperation
+from schemas.auth_schema import TokenData
 from utils.error_messages import AuthErrorMessages
 from database.database import MongoDB
 from database.repository.user_repository import UserRepository
-from schemas.auth_schema import TokenData
 
 
 class AuthService:
@@ -13,7 +14,7 @@ class AuthService:
 
     # its called onboard bc i cant think of a better name
     @classmethod
-    async def onboard_user(cls, token_data: TokenData):
+    async def onboard_user(cls, token_data: TokenData) -> SuccessOperation:
         """
         "Onboards" a user by creating a new entry in the database
 
@@ -42,4 +43,4 @@ class AuthService:
         )
 
         cls.logger.info("Created user")
-        return {"message": "onboard"}
+        return SuccessOperation(success=True)
