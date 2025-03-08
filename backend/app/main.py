@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
+# server_app is required even though we dont use it
 async def lifespan(server_app: FastAPI):
     try:
         logger.info("starting server")

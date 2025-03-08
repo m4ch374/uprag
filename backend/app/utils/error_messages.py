@@ -10,3 +10,4 @@ class GeneralErrorMessages:
 @dataclass
 class AuthErrorMessages:
     INVALID_CREDENTIALS = "Invalid credentials"
+    USER_ALREADY_EXISTS = "User already exists"
