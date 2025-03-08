@@ -2,11 +2,11 @@ import os
 import logging
 
 from contextlib import asynccontextmanager
-from typing import Union
 
 from fastapi import FastAPI
 
 from database.database import MongoDB
+from api.v1.api import api_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,13 +29,10 @@ async def lifespan(server_app: FastAPI):
 
 app = FastAPI(title="uprag", lifespan=lifespan)
 
+app.include_router(api_router, prefix="/api/v1")
+
 
 @app.get("/")
 def read_root():
-    logger.info("read root")
+    logger.info("Hello world")
     return {"Hello": "World"}
-
-
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
