@@ -10,3 +10,7 @@ class KnowledgeUtils:
             # "application/vnd.openxmlformats-officedocument.presentationml.presentation",
             # "text/xml",
         ]
+
+    @staticmethod
+    def get_rag_index_name(user_id: str):
+        return f"rag-{user_id.replace('_', '-').lower()}"

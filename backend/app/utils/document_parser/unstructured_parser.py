@@ -13,7 +13,7 @@ from utils.document_parser.document_parser import (
 )
 
 
-# no customization cuz no time and no point
+# pylint: disable=too-many-instance-attributes
 class UnstructuredDocumentParser(DocumentParser):
     unstructured_api_key: str = os.environ["UNSTRUCTURED_API_KEY"]
     unstructured_server_url: str = "https://api.unstructured.io/general/v0/general"
@@ -34,6 +34,7 @@ class UnstructuredDocumentParser(DocumentParser):
         chunk_size: int = 500,
     ):
         parser = UnstructuredDocumentParser()
+        parser.file = file
         parser.file_name = file.filename
         parser.file_type = file.content_type
         parser.file_extension = Path(file.filename).suffix
@@ -57,7 +58,7 @@ class UnstructuredDocumentParser(DocumentParser):
                 "partition_parameters": {
                     "files": {
                         "content": BytesIO(await self.file.read()).read(),
-                        "file_name": self.file.filename,
+                        "file_name": self.file_name,
                         "content_type": self.file_type,
                     },
                     "strategy": shared.Strategy.HI_RES,

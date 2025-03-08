@@ -14,6 +14,7 @@ DEFAULT_ACCEPTED_FILE_TYPES = [
 
 
 class DocumentParser:
+    file: UploadFile
     file_name: str
     file_size: int
     file_type: str
