@@ -3,10 +3,15 @@ from pathlib import Path
 from fastapi import HTTPException, UploadFile, status
 
 from utils.document_parser.unstructured_parser import UnstructuredDocumentParser
-from utils.error_messages import KnowledgeErrorMessages
+from utils.error_messages import GeneralErrorMessages, KnowledgeErrorMessages
 from database.database import MongoDB
 from database.repository.document_repository import DocumentRepository
-from schemas.knowledge_schema import KnowledgeUploadResponse
+from schemas.common_schema import SuccessOperation
+from schemas.knowledge_schema import (
+    KnowledgeGetResponse,
+    KnowledgeListResponse,
+    KnowledgeUploadResponse,
+)
 from schemas.auth_schema import TokenData
 
 
@@ -52,3 +57,47 @@ class KnowledgeService:
         # await pc.add_texts(texts, partition=document.id)
 
         return KnowledgeUploadResponse(**document.model_dump(by_alias=True))
+
+    @classmethod
+    async def get_knowledges(cls, token_data: TokenData) -> KnowledgeListResponse:
+        db = MongoDB.get_database()
+        document_repo = DocumentRepository(db)
+
+        documents = await document_repo.list_all({"created_by": token_data.user_id})
+
+        return KnowledgeListResponse(
+            knowledges=[
+                KnowledgeGetResponse(**doc.model_dump(by_alias=True))
+                for doc in documents
+            ]
+        )
+
+    @classmethod
+    async def get_knowledge(
+        cls, token_data: TokenData, knowledge_id: str
+    ) -> KnowledgeGetResponse:
+        db = MongoDB.get_database()
+        document_repo = DocumentRepository(db)
+        document = await document_repo.get(knowledge_id)
+        if not document or document.created_by != token_data.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=GeneralErrorMessages.NOT_FOUND,
+            )
+
+        return KnowledgeGetResponse(**document.model_dump(by_alias=True))
+
+    @classmethod
+    async def delete_knowledge(cls, token_data: TokenData, knowledge_id: str) -> None:
+        db = MongoDB.get_database()
+        document_repo = DocumentRepository(db)
+        document = await document_repo.get(knowledge_id)
+        if not document or document.created_by != token_data.user_id:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=GeneralErrorMessages.NOT_FOUND,
+            )
+
+        await document_repo.delete(knowledge_id)
+
+        return SuccessOperation(success=True)
