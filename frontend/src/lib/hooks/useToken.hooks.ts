@@ -10,7 +10,7 @@ const useToken = () => {
   useEffect(() => {
     if (!isLoaded || !isSignedIn) return;
 
-    void getToken().then(token => {
+    void getToken({ template: "auth-template" }).then(token => {
       setToken(token || "");
     });
   }, [isLoaded, isSignedIn, getToken]);
