@@ -144,7 +144,7 @@ class ChatService:
 
             if body.knowledge != chat.knowledge:
                 asyncio.create_task(
-                    chat_repo.update(chat_id, {"knowledge": body.knowledge})
+                    chat_repo.update(chat_id, {"knowledge": body.knowledge}, {})
                 )
 
             gpt_agent = ChatGPTAgent(

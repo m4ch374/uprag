@@ -4,6 +4,7 @@ export type TChat = {
   id: string;
   created_by: string;
   history: string;
+  knowledge: string[];
 };
 
 // ===========================
@@ -20,6 +21,7 @@ export type TChatGet = TEndpoint<void, TChatGetResponse>;
 
 export type TChatCreateRequest = {
   user_query: string;
+  knowledge: string[];
 };
 
 export type TChatCreateResponse = TChat;
@@ -32,6 +34,7 @@ export type TChatCreate = TEndpoint<TChatCreateRequest, TChatCreateResponse>;
 
 export type TChatContinueRequest = {
   user_query: string;
+  knowledge: string[];
 };
 
 export type TChatContinueResponse = TChat;

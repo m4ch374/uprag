@@ -19,11 +19,18 @@ import {
 import chatKeys from "../constants/chat.keys";
 import { TChatGPTHistoryItem } from "../types/GlobalTypes";
 
+type TGetChatSelected = {
+  id: string;
+  created_by: string;
+  history: TChatGPTHistoryItem[];
+  knowledge: string[];
+};
+
 export const useGetChat = (
   accessToken: string,
   chatId: string,
   queryOptions?: Omit<
-    UseQueryOptions<TChatGetResponse, unknown, TChatGPTHistoryItem[]>,
+    UseQueryOptions<TChatGetResponse, unknown, TGetChatSelected>,
     "queryKey" | "queryFn"
   >,
 ) => {
@@ -33,7 +40,10 @@ export const useGetChat = (
       Fetcher.init<TChatGet>("GET", `/chat/${chatId}`)
         .withToken(accessToken)
         .fetchData(),
-    select: data => JSON.parse(data.history) as TChatGPTHistoryItem[],
+    select: data => ({
+      ...data,
+      history: JSON.parse(data.history) as TChatGPTHistoryItem[],
+    }),
     enabled: !!chatId && !!accessToken,
     ...queryOptions,
   });
