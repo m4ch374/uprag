@@ -2,6 +2,7 @@ import ChatTextBox from "@/components/ChatTextBox";
 import TextWithLineBreaks from "@/components/TextWithLineBreaks";
 import useToken from "@/lib/hooks/useToken.hooks";
 import { useContinueChat, useGetChat } from "@/lib/services/chat.service";
+import { useListKnowledge } from "@/lib/services/knowledge.service";
 import { TChatGPTHistoryItem } from "@/lib/types/GlobalTypes";
 import { prefixedWithMagic } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,7 @@ const ChatPageID: React.FC = () => {
   const { id } = useParams();
 
   const { data: chatData } = useGetChat(accessToken, id || "");
+  const { data: knowledges } = useListKnowledge(accessToken);
 
   const continueChat = useContinueChat(accessToken, queryClient, id || "");
 
@@ -29,8 +31,8 @@ const ChatPageID: React.FC = () => {
   return (
     <div className="pt-8 px-8 relative h-full flex flex-col justify-between">
       <div className="max-w-[75%] pb-20">
-        {chatData
-          ?.filter(item => shouldDisplayItem(item))
+        {chatData?.history
+          .filter(item => shouldDisplayItem(item))
           .map((item, index) => (
             <Fragment key={index}>
               {!!index && item.role === "user" && <hr className="my-6" />}
@@ -50,10 +52,16 @@ const ChatPageID: React.FC = () => {
       <ChatTextBox
         className="sticky bottom-4 w-full left-1/2 shadow-lg"
         loading={!chatData || continueChat.isPending}
-        onTextSubmission={(text, e) => {
+        onTextSubmission={(text, knowledges, e) => {
           e.preventDefault();
-          continueChat.mutate({ user_query: text });
+          continueChat.mutate({
+            user_query: text,
+            knowledge: knowledges.map(k => k.id),
+          });
         }}
+        defaultKnowledge={knowledges?.knowledges.filter(k =>
+          chatData?.knowledge.find(s => s === k.id),
+        )}
       />
     </div>
   );

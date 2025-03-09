@@ -3,13 +3,21 @@ import { Button } from "./ui/button";
 import { SendHorizonal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Spinner from "./Spinner";
+import DocumentSelector from "./DocumentSelector";
+import { TKnowledge } from "@/lib/types/services/knowledge.servies";
 
 const ChatTextBox: React.FC<{
   className?: string;
-  onTextSubmission?: (text: string, e: FormEvent<HTMLFormElement>) => void;
+  onTextSubmission?: (
+    text: string,
+    knowledges: TKnowledge[],
+    e: FormEvent<HTMLFormElement>,
+  ) => void;
   loading?: boolean;
-}> = ({ className, onTextSubmission, loading }) => {
+  defaultKnowledge?: TKnowledge[];
+}> = ({ className, onTextSubmission, loading, defaultKnowledge }) => {
   const [text, setText] = useState("");
+  const documentController = useState<TKnowledge[]>(defaultKnowledge || []);
 
   return (
     <form
@@ -18,7 +26,7 @@ const ChatTextBox: React.FC<{
         className,
       )}
       onSubmit={e => {
-        onTextSubmission?.(text, e);
+        onTextSubmission?.(text, documentController[0], e);
         setText("");
       }}
     >
@@ -30,7 +38,9 @@ const ChatTextBox: React.FC<{
         disabled={loading}
       />
 
-      <div className="flex justify-end p-2">
+      <div className="flex justify-between p-2">
+        <DocumentSelector documentController={documentController} />
+
         <Button
           className="bg-emerald-600 hover:bg-emerald-700 transition-colors"
           type="submit"

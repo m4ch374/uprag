@@ -21,11 +21,12 @@ const ChatPage: React.FC = () => {
         <ChatTextBox
           className="mt-4"
           loading={createChat.isPending}
-          onTextSubmission={(text, e) => {
+          onTextSubmission={(text, knowledges, e) => {
             e.preventDefault();
             createChat.mutate(
               {
                 user_query: text,
+                knowledge: knowledges.map(k => k.id),
               },
               {
                 onSuccess: data => navigate(`/chat/${data.id}`),

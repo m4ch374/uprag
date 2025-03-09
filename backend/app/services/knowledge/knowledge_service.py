@@ -1,11 +1,12 @@
 import logging
 from fastapi import HTTPException, UploadFile, status
+from pinecone.control.pinecone_asyncio import asyncio
 
 from services.knowledge.utils import KnowledgeUtils
 from vector_db.pinecone import PineconeDB
 from utils.document_parser.unstructured_parser import UnstructuredDocumentParser
 from utils.error_messages import GeneralErrorMessages, KnowledgeErrorMessages
-from database.repository.user_repository import UserRepository
+from database.repository.chat_repository import ChatRepository
 from database.database import MongoDB
 from database.repository.document_repository import DocumentRepository
 from schemas.common_schema import SuccessOperation
@@ -124,23 +125,20 @@ class KnowledgeService:
                     detail=GeneralErrorMessages.NOT_FOUND,
                 )
 
-            user_repo = UserRepository(db)
-            user = await user_repo.get(token_data.user_id)
-            if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=GeneralErrorMessages.NOT_FOUND,
+            chat_repo = ChatRepository(db)
+            chats = await chat_repo.list_all({"knowledge": knowledge_id})
+            for chat in chats:
+                asyncio.create_task(
+                    chat_repo.update(
+                        chat.id,
+                        {"knowledge": [k for k in chat.knowledge if k != knowledge_id]},
+                    )
                 )
 
-            await user_repo.update(
-                user.id,
-                {"knowledge": [k for k in user.knowledge if k != knowledge_id]},
-                {},
-            )
-            await document_repo.delete(knowledge_id)
+            asyncio.create_task(document_repo.delete(knowledge_id))
 
             pc = PineconeDB(index=KnowledgeUtils.get_rag_index_name(token_data.user_id))
-            await pc.remove_by_partition(knowledge_id)
+            await pc.remove_by_partition(knowledge_id)  # have to wait for it
 
             return SuccessOperation(success=True)
         except Exception as e:
