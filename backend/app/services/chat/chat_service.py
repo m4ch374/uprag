@@ -1,3 +1,4 @@
+import logging
 from fastapi import HTTPException, status
 from services.chat.chat_utils import ChatUtils
 from database.database import MongoDB
@@ -11,9 +12,11 @@ from schemas.chat_schema import ChatGenerateResponse
 
 
 class ChatService:
-    @staticmethod
+    logger = logging.getLogger(__name__)
+
+    @classmethod
     async def complete_chat(
-        token_data: TokenData, message: str
+        cls, token_data: TokenData, message: str
     ) -> ChatGenerateResponse:
         try:
             db = MongoDB.get_database()
@@ -39,26 +42,27 @@ class ChatService:
                 initial_history=chat_history,
             )
 
-            response = await gpt_agent.generate_response(
+            await gpt_agent.generate_response(
                 message, rag=len(user.knowledge), partitions=user.knowledge
             )
 
             if chat:
-                await chat_repo.update(
-                    chat.id, history=ChatUtils.history_to_string(gpt_agent.history)
+                chat = await chat_repo.update(
+                    chat.id,
+                    {"history": ChatUtils.history_to_string(gpt_agent.history)},
+                    {},
                 )
             else:
-                await chat_repo.add(
+                chat = await chat_repo.add(
                     {
                         "created_by": token_data.user_id,
                         "history": ChatUtils.history_to_string(gpt_agent.history),
                     }
                 )
 
-            return ChatGenerateResponse(
-                assistant_response=response.choices[0].message.content
-            )
+            return ChatGenerateResponse(**chat.model_dump(by_alias=True))
         except Exception as e:
+            cls.logger.error("Error generating chat: %s", e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,
