@@ -18,7 +18,7 @@ CONTEXT_ASSISTANT_CONTENT = (
 I've retrieved the following information from the knowledge base that's relevant to your query:
 
 <Documents>
-{[CONTEXT_DOCUMENT(documents) + "\n" for documents in documents]}
+{"\n".join([CONTEXT_DOCUMENT(documents) for documents in documents])}
 </Document>
 
 I'll use this information to answer your question.
