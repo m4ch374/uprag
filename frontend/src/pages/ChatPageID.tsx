@@ -7,7 +7,7 @@ import { TChatGPTHistoryItem } from "@/lib/types/GlobalTypes";
 import { prefixedWithMagic } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import { BookOpenText } from "lucide-react";
-import React, { Fragment, useCallback } from "react";
+import React, { Fragment, useCallback, useEffect } from "react";
 import { useParams } from "react-router";
 
 const ChatPageID: React.FC = () => {
@@ -27,6 +27,10 @@ const ChatPageID: React.FC = () => {
       !prefixedWithMagic(item.content)
     );
   }, []);
+
+  useEffect(() => {
+    console.log("chatData", chatData?.history);
+  }, [chatData?.history]);
 
   return (
     <div className="pt-8 px-8 relative h-full flex flex-col justify-between">
