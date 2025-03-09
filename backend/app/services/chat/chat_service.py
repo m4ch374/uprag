@@ -1,5 +1,7 @@
 from fastapi import HTTPException, status
+from services.chat.chat_utils import ChatUtils
 from database.database import MongoDB
+from database.repository.chat_repository import ChatRepository
 from database.repository.user_repository import UserRepository
 from utils.error_messages import GeneralErrorMessages
 from utils.prompt_templates.rag_template import RAG_TEMPLATE
@@ -25,16 +27,33 @@ class ChatService:
                     detail=GeneralErrorMessages.NOT_FOUND,
                 )
 
+            chat_repo = ChatRepository(db)
+            chat = await chat_repo.get(token_data.user_id, key="created_by")
+            chat_history = ChatUtils.string_to_history(chat.history) if chat else []
+
             gpt_agent = ChatGPTAgent(
                 model="gpt-4o",
                 system_prompt=RAG_TEMPLATE,
                 temperature=0.6,  # less variation is g
                 user_id=token_data.user_id,
+                initial_history=chat_history,
             )
 
             response = await gpt_agent.generate_response(
                 message, rag=len(user.knowledge), partitions=user.knowledge
             )
+
+            if chat:
+                await chat_repo.update(
+                    chat.id, history=ChatUtils.history_to_string(gpt_agent.history)
+                )
+            else:
+                await chat_repo.add(
+                    {
+                        "created_by": token_data.user_id,
+                        "history": ChatUtils.history_to_string(gpt_agent.history),
+                    }
+                )
 
             return ChatGenerateResponse(
                 assistant_response=response.choices[0].message.content
