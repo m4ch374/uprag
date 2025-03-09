@@ -18,7 +18,7 @@ class ChatGPTAgent(Agent):
         ]
 
     async def generate_chat_response(self, user_query: str):
-        return await self.client.chat.completions.create(
+        response = await self.client.chat.completions.create(
             model=self.model,
             messages=[
                 *self.history,
@@ -26,3 +26,8 @@ class ChatGPTAgent(Agent):
             ],
             temperature=self.temperature,
         )
+        self.history.append({"role": "user", "content": user_query})
+        self.history.append(
+            {"role": "assistant", "content": response.choices[0].message.content}
+        )
+        return response
