@@ -18,10 +18,9 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 # server_app is required even though we dont use it
-async def lifespan(server_app: FastAPI):
+async def lifespan(_: FastAPI):
     try:
         logger.info("starting server")
-        logger.info(server_app)  # to keep pylint happy
         MongoDB.initialize(os.environ["MONGODB_URL"], os.environ["MONGODB_DB_NAME"])
         yield
         logger.info("stopping server")

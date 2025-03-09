@@ -11,7 +11,7 @@ const ProtectedRoutes: React.FC = () => {
   return (
     <div className="w-full h-screen bg-slate-100 flex">
       <NavBar />
-      <div className="m-4 flex-1 rounded-sm bg-white">
+      <div className="m-4 flex-1 rounded-sm bg-white overflow-y-auto">
         <Outlet />
       </div>
     </div>

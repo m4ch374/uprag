@@ -2,8 +2,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from utils.error_messages import GeneralErrorMessages
-from schemas.common_schema import SuccessOperation
-from schemas.auth_schema import TokenData
+from schemas.auth_schema import AuthOnboardResponse, TokenData
 from services.auth.auth_service import AuthService
 from services.auth.utils import AuthUtils
 
@@ -15,7 +14,7 @@ logger = logging.getLogger(__name__)
 @router.post("/onboard", status_code=status.HTTP_201_CREATED)
 async def onboard(
     token_data: TokenData = Depends(AuthUtils.verify_token),
-) -> SuccessOperation:
+) -> AuthOnboardResponse:
     try:
         data = await AuthService.onboard_user(token_data)
     except HTTPException as e:
