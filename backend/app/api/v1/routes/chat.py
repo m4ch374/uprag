@@ -9,6 +9,8 @@ from schemas.chat_schema import (
     ChatGenerateResponse,
     ChatGetResponse,
     ChatListResponse,
+    ChatModifyRequest,
+    ChatModifyResponse,
 )
 from schemas.auth_schema import TokenData
 from services.chat.chat_service import ChatService
@@ -116,6 +118,33 @@ async def continue_chat(
         raise e
     except Exception as e:
         logger.error("Error continuing chat with id %s: %s", chat_id, e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,
+        ) from e
+
+    return data
+
+
+@router.patch(
+    "/{chat_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ChatModifyResponse,
+    response_model_by_alias=False,
+)
+async def modify_chat(
+    chat_id: str,
+    body: ChatModifyRequest = Body(...),
+    token_data: TokenData = Depends(AuthUtils.verify_token),
+) -> ChatModifyResponse:
+    try:
+        logger.info("Modifying chat with id %s", chat_id)
+        data = await ChatService.modify_chat(chat_id, body, token_data)
+    except HTTPException as e:
+        logger.error("Error modifying chat with id %s: %s", chat_id, e)
+        raise e
+    except Exception as e:
+        logger.error("Error modifying chat with id %s: %s", chat_id, e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,

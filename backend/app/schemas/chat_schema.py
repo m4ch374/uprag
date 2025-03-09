@@ -32,3 +32,13 @@ class ChatContinueRequest(BaseModel):
 
 class ChatContinueResponse(ChatModel):
     pass
+
+
+class ChatModifyRequest(BaseModel):
+    knowledge: List[str] = Field(
+        default=[], description="Knowledge base used to generate the chat"
+    )
+
+
+class ChatModifyResponse(ChatModel):
+    pass
