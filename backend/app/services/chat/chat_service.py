@@ -28,7 +28,7 @@ class ChatService:
             gpt_agent = ChatGPTAgent(
                 model="gpt-4o",
                 system_prompt=RAG_TEMPLATE,
-                temperature=0.6,
+                temperature=0.6,  # less variation is g
                 user_id=token_data.user_id,
             )
 
