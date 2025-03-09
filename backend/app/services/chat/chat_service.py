@@ -84,6 +84,7 @@ class ChatService:
             chat = await chat_repo.add(
                 {
                     "created_by": token_data.user_id,
+                    "chat_title": message,
                     "history": ChatUtils.history_to_string(gpt_agent.history),
                 }
             )
