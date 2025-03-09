@@ -1,6 +1,7 @@
 import logging
 from fastapi import HTTPException, UploadFile, status
 
+from app.database.repository.user_repository import UserRepository
 from services.knowledge.utils import KnowledgeUtils
 from vector_db.pinecone import PineconeDB
 from utils.document_parser.unstructured_parser import UnstructuredDocumentParser
@@ -123,7 +124,23 @@ class KnowledgeService:
                     detail=GeneralErrorMessages.NOT_FOUND,
                 )
 
+            user_repo = UserRepository(db)
+            user = await user_repo.get(token_data.user_id)
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=GeneralErrorMessages.NOT_FOUND,
+                )
+
+            await user_repo.update(
+                user.id,
+                {"knowledge": [k for k in user.knowledge if k != knowledge_id]},
+                {},
+            )
             await document_repo.delete(knowledge_id)
+
+            pc = PineconeDB(index=KnowledgeUtils.get_rag_index_name(token_data.user_id))
+            await pc.remove_by_partition(knowledge_id)
 
             return SuccessOperation(success=True)
         except Exception as e:
