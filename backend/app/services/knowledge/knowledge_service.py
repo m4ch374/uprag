@@ -1,11 +1,11 @@
 import logging
 from fastapi import HTTPException, UploadFile, status
 
-from app.database.repository.user_repository import UserRepository
 from services.knowledge.utils import KnowledgeUtils
 from vector_db.pinecone import PineconeDB
 from utils.document_parser.unstructured_parser import UnstructuredDocumentParser
 from utils.error_messages import GeneralErrorMessages, KnowledgeErrorMessages
+from database.repository.user_repository import UserRepository
 from database.database import MongoDB
 from database.repository.document_repository import DocumentRepository
 from schemas.common_schema import SuccessOperation
