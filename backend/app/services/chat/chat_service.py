@@ -155,7 +155,7 @@ class ChatService:
                 initial_history=ChatUtils.string_to_history(chat.history),
             )
             await gpt_agent.generate_response(
-                body.message, rag=len(body.knowledge), partitions=body.knowledge
+                body.user_query, rag=len(body.knowledge), partitions=body.knowledge
             )
 
             chat = await chat_repo.update(
