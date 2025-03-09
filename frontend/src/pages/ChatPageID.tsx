@@ -5,6 +5,7 @@ import { useContinueChat, useGetChat } from "@/lib/services/chat.service";
 import { TChatGPTHistoryItem } from "@/lib/types/GlobalTypes";
 import { prefixedWithMagic } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
+import { BookOpenText } from "lucide-react";
 import React, { Fragment, useCallback } from "react";
 import { useParams } from "react-router";
 
@@ -36,10 +37,12 @@ const ChatPageID: React.FC = () => {
               {item.role === "user" ? (
                 <h1 className="text-4xl font-semibold">{item.content}</h1>
               ) : (
-                <TextWithLineBreaks
-                  text={item.content}
-                  className="mt-4 text-lg"
-                />
+                <>
+                  <div className="flex items-center py-2 gap-2 font-semibold mt-5">
+                    <BookOpenText className="stroke-emerald-500 mt-1" /> Answer
+                  </div>
+                  <TextWithLineBreaks text={item.content} className="text-lg" />
+                </>
               )}
             </Fragment>
           ))}

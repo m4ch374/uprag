@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { Book, Bot, ChevronsUpDown } from "lucide-react";
+import { Book, BookOpenText, Bot, ChevronsUpDown } from "lucide-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
 
 const NavBarItem: React.FC<{ children: ReactNode; href: string }> = ({
@@ -22,7 +22,18 @@ const NavBar: React.FC = () => {
   return (
     <div className="flex flex-col justify-between pt-4 h-full min-w-64">
       <div className="flex flex-col">
-        <h1 className="text-center text-2xl font-bold">Uprag</h1>
+        <div className="text-4xl font-bold ml-4 flex gap-2 items-center">
+          <BookOpenText className="size-10 stroke-emerald-500 mt-2" />
+          <h1>Uprag</h1>
+        </div>
+
+        <a
+          className="ml-4 my-4 rounded-full border border-slate-400 bg-neutral-200 p-1.5 px-4 font-semibold text-neutral-500 transition-colors duration-500 hover:border-emerald-500 hover:text-neutral-600"
+          href="/chat"
+        >
+          Ask a new question
+        </a>
+
         <ul className="flex flex-col mt-4 w-full px-4 gap-2">
           <NavBarItem href="/chat">
             <Bot />
