@@ -1,7 +1,7 @@
 # TODO: streaming support
 
 
-from typing import Optional
+from typing import List, Optional
 
 
 class Agent:
@@ -26,15 +26,22 @@ class Agent:
         raise NotImplementedError("Not implemented")
 
     async def generate_ragged_chat_response(
-        self, user_query: str, user_id: Optional[str] = None
+        self,
+        user_query: str,
+        user_id: Optional[str] = None,
+        partitions: Optional[List[str]] = None,
     ):
         raise NotImplementedError("Not implemented")
 
     async def generate_response(
-        self, user_query: str, rag: bool = False, user_id: Optional[str] = None
+        self,
+        user_query: str,
+        rag: bool = False,
+        user_id: Optional[str] = None,
+        partitions: Optional[List[str]] = None,
     ):
         return await (
             self.generate_chat_response(user_query)
             if not rag
-            else self.generate_ragged_chat_response(user_query, user_id)
+            else self.generate_ragged_chat_response(user_query, user_id, partitions)
         )

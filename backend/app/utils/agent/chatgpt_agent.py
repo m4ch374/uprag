@@ -1,5 +1,5 @@
 import os
-from typing import Optional
+from typing import List, Optional
 
 from openai import AsyncOpenAI
 
@@ -38,7 +38,10 @@ class ChatGPTAgent(Agent):
         return response
 
     async def generate_ragged_chat_response(
-        self, user_query: str, user_id: Optional[str] = None
+        self,
+        user_query: str,
+        user_id: Optional[str] = None,
+        partitions: Optional[List[str]] = None,
     ):
         pinecone = PineconeDB(
             KnowledgeUtils.get_rag_index_name(user_id or self.user_id)
@@ -48,7 +51,7 @@ class ChatGPTAgent(Agent):
         # TODO: dynamic partitions
         search_result = await pinecone.search(
             user_query,
-            partitions=["67cc6e55ab044969d0ad8151", "67cc6dc52f865b6db9c32764"],
+            partitions=partitions or [],
         )
 
         contents = [content for content, _, _ in search_result]
