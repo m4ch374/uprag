@@ -83,7 +83,7 @@ async def start_chat(
 ) -> ChatGenerateResponse:
     try:
         logger.info("Generating chat")
-        data = await ChatService.start_chat(token_data, body.user_query)
+        data = await ChatService.start_chat(token_data, body)
     except HTTPException as e:
         logger.error("Error generating chat: %s", e)
         raise e
@@ -110,7 +110,7 @@ async def continue_chat(
 ) -> ChatContinueResponse:
     try:
         logger.info("Continuing chat with id %s", chat_id)
-        data = await ChatService.continue_chat(chat_id, token_data, body.user_query)
+        data = await ChatService.continue_chat(chat_id, token_data, body)
     except HTTPException as e:
         logger.error("Error continuing chat with id %s: %s", chat_id, e)
         raise e
