@@ -69,6 +69,8 @@ class PineconeDB(VectorDB):
     ) -> List[Tuple[str, str, float]]:
         """
         Return pinecone documents most similar to query, along with scores.
+
+        Output: (Retrieved text, metadata, score)
         """
         query_obj = await self.create_openai_embedding(query)
         docs = []
@@ -80,8 +82,8 @@ class PineconeDB(VectorDB):
             results = await index.query_namespaces(
                 vector=query_obj,
                 metric="cosine",
-                namespaces=partitions or self.config.partitions,
-                top_k=self.config.top_k,
+                namespaces=partitions,
+                top_k=7,
                 include_metadata=True,
                 include_values=False,
                 show_progress=False,
