@@ -3,8 +3,8 @@ import React from "react";
 
 const ChatPageID: React.FC = () => {
   return (
-    <div className="pt-8 px-8 relative h-full">
-      <div className="max-w-[75%]">
+    <div className="pt-8 px-8 relative h-full flex flex-col justify-between">
+      <div className="max-w-[75%] pb-20">
         <h1 className="text-4xl font-semibold">
           What is the whisttleblower act?
         </h1>
@@ -20,7 +20,7 @@ const ChatPageID: React.FC = () => {
         </p>
       </div>
 
-      <ChatTextBox className="absolute bottom-4 w-[90%] left-1/2 -translate-x-1/2" />
+      <ChatTextBox className="sticky bottom-4 w-full left-1/2" />
     </div>
   );
 };
