@@ -75,13 +75,13 @@ async def get_chat(
     response_model=ChatGenerateResponse,
     response_model_by_alias=False,
 )
-async def generate_chat(
+async def start_chat(
     token_data: TokenData = Depends(AuthUtils.verify_token),
     body: ChatGenerateRequest = Body(...),
 ) -> ChatGenerateResponse:
     try:
         logger.info("Generating chat")
-        data = await ChatService.complete_chat(token_data, body.user_query)
+        data = await ChatService.start_chat(token_data, body.user_query)
     except HTTPException as e:
         logger.error("Error generating chat: %s", e)
         raise e

@@ -54,7 +54,7 @@ class ChatService:
             ) from e
 
     @classmethod
-    async def complete_chat(
+    async def start_chat(
         cls, token_data: TokenData, message: str
     ) -> ChatGenerateResponse:
         try:
@@ -70,34 +70,23 @@ class ChatService:
                 )
 
             chat_repo = ChatRepository(db)
-            chat = await chat_repo.get(token_data.user_id, key="created_by")
-            chat_history = ChatUtils.string_to_history(chat.history) if chat else []
-
             gpt_agent = ChatGPTAgent(
                 model="gpt-4o",
                 system_prompt=RAG_TEMPLATE,
                 temperature=0.6,  # less variation is g
                 user_id=token_data.user_id,
-                initial_history=chat_history,
             )
 
             await gpt_agent.generate_response(
                 message, rag=len(user.knowledge), partitions=user.knowledge
             )
 
-            if chat:
-                chat = await chat_repo.update(
-                    chat.id,
-                    {"history": ChatUtils.history_to_string(gpt_agent.history)},
-                    {},
-                )
-            else:
-                chat = await chat_repo.add(
-                    {
-                        "created_by": token_data.user_id,
-                        "history": ChatUtils.history_to_string(gpt_agent.history),
-                    }
-                )
+            chat = await chat_repo.add(
+                {
+                    "created_by": token_data.user_id,
+                    "history": ChatUtils.history_to_string(gpt_agent.history),
+                }
+            )
 
             return ChatGenerateResponse(**chat.model_dump(by_alias=True))
         except Exception as e:
