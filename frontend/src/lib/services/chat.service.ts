@@ -14,6 +14,7 @@ import {
   TChatGetResponse,
 } from "../types/services/chat.services";
 import chatKeys from "../constants/chat.keys";
+import { TChatGPTHistoryItem } from "../types/GlobalTypes";
 
 export const useCreateChat = (
   accessToken: string,
@@ -39,7 +40,7 @@ export const useGetChat = (
   accessToken: string,
   chatId: string,
   queryOptions?: Omit<
-    UseQueryOptions<TChatGetResponse, unknown>,
+    UseQueryOptions<TChatGetResponse, unknown, TChatGPTHistoryItem[]>,
     "queryKey" | "queryFn"
   >,
 ) => {
@@ -49,6 +50,8 @@ export const useGetChat = (
       Fetcher.init<TChatGet>("GET", `/chat/${chatId}`)
         .withToken(accessToken)
         .fetchData(),
+    select: data => JSON.parse(data.history) as TChatGPTHistoryItem[],
+    enabled: !!chatId && !!accessToken,
     ...queryOptions,
   });
 };

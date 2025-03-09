@@ -20,7 +20,7 @@ class ChatGPTAgent(Agent):
     def __generate_initial_history__(self):
         return [
             {
-                "role": "system",
+                "role": "developer",
                 "content": self.system_prompt,
             }
         ]
