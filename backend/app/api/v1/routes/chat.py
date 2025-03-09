@@ -3,6 +3,8 @@ from fastapi import APIRouter, Body, Depends, HTTPException, status
 
 from utils.error_messages import GeneralErrorMessages
 from schemas.chat_schema import (
+    ChatContinueRequest,
+    ChatContinueResponse,
     ChatGenerateRequest,
     ChatGenerateResponse,
     ChatGetResponse,
@@ -71,7 +73,7 @@ async def get_chat(
 
 @router.post(
     "",
-    status_code=status.HTTP_200_OK,
+    status_code=status.HTTP_201_CREATED,
     response_model=ChatGenerateResponse,
     response_model_by_alias=False,
 )
@@ -87,6 +89,33 @@ async def start_chat(
         raise e
     except Exception as e:
         logger.error("Error generating chat: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,
+        ) from e
+
+    return data
+
+
+@router.post(
+    "/{chat_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ChatContinueResponse,
+    response_model_by_alias=False,
+)
+async def continue_chat(
+    chat_id: str,
+    token_data: TokenData = Depends(AuthUtils.verify_token),
+    body: ChatContinueRequest = Body(...),
+) -> ChatContinueResponse:
+    try:
+        logger.info("Continuing chat with id %s", chat_id)
+        data = await ChatService.continue_chat(chat_id, token_data, body.user_query)
+    except HTTPException as e:
+        logger.error("Error continuing chat with id %s: %s", chat_id, e)
+        raise e
+    except Exception as e:
+        logger.error("Error continuing chat with id %s: %s", chat_id, e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,

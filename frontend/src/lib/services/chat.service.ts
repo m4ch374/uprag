@@ -7,6 +7,9 @@ import {
 } from "@tanstack/react-query";
 import Fetcher from "../fetcher";
 import {
+  TChatContinue,
+  TChatContinueRequest,
+  TChatContinueResponse,
   TChatCreate,
   TChatCreateRequest,
   TChatCreateResponse,
@@ -15,6 +18,26 @@ import {
 } from "../types/services/chat.services";
 import chatKeys from "../constants/chat.keys";
 import { TChatGPTHistoryItem } from "../types/GlobalTypes";
+
+export const useGetChat = (
+  accessToken: string,
+  chatId: string,
+  queryOptions?: Omit<
+    UseQueryOptions<TChatGetResponse, unknown, TChatGPTHistoryItem[]>,
+    "queryKey" | "queryFn"
+  >,
+) => {
+  return useQuery({
+    queryKey: chatKeys.getId(chatId),
+    queryFn: () =>
+      Fetcher.init<TChatGet>("GET", `/chat/${chatId}`)
+        .withToken(accessToken)
+        .fetchData(),
+    select: data => JSON.parse(data.history) as TChatGPTHistoryItem[],
+    enabled: !!chatId && !!accessToken,
+    ...queryOptions,
+  });
+};
 
 export const useCreateChat = (
   accessToken: string,
@@ -36,22 +59,23 @@ export const useCreateChat = (
     ...mutationOptions,
   });
 
-export const useGetChat = (
+export const useContinueChat = (
   accessToken: string,
-  chatId: string,
-  queryOptions?: Omit<
-    UseQueryOptions<TChatGetResponse, unknown, TChatGPTHistoryItem[]>,
-    "queryKey" | "queryFn"
+  queryClient: QueryClient,
+  chat_id: string,
+  mutationOptions?: Omit<
+    UseMutationOptions<TChatContinueResponse, unknown, TChatContinueRequest>,
+    "mutationFn"
   >,
-) => {
-  return useQuery({
-    queryKey: chatKeys.getId(chatId),
-    queryFn: () =>
-      Fetcher.init<TChatGet>("GET", `/chat/${chatId}`)
+) =>
+  useMutation({
+    mutationFn: (body: TChatContinueRequest) =>
+      Fetcher.init<TChatContinue>("POST", `/chat/${chat_id}`)
         .withToken(accessToken)
+        .withData(body)
         .fetchData(),
-    select: data => JSON.parse(data.history) as TChatGPTHistoryItem[],
-    enabled: !!chatId && !!accessToken,
-    ...queryOptions,
+    onSuccess: data => {
+      queryClient.setQueryData(chatKeys.getId(data.id), data);
+    },
+    ...mutationOptions,
   });
-};

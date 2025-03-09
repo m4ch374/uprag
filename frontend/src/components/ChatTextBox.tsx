@@ -17,12 +17,16 @@ const ChatTextBox: React.FC<{
         "bg-slate-100 rounded-md border border-slate-200 focus-within:border-slate-300 transition-colors w-full",
         className,
       )}
-      onSubmit={e => onTextSubmission?.(text, e)}
+      onSubmit={e => {
+        onTextSubmission?.(text, e);
+        setText("");
+      }}
     >
       <textarea
         className={`resize-none w-full min-h-16 rounded-t-[inherit] p-2.5 text-lg focus:ring-0 focus:outline-none ${loading && "text-gray-500"}`}
         placeholder="Ask a question..."
         onChange={t => setText(t.target.value)}
+        value={text}
         disabled={loading}
       />
 

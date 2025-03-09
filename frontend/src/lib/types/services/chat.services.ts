@@ -25,3 +25,18 @@ export type TChatCreateRequest = {
 export type TChatCreateResponse = TChat;
 
 export type TChatCreate = TEndpoint<TChatCreateRequest, TChatCreateResponse>;
+
+// ===========================
+// POST /chat/:id
+// ===========================
+
+export type TChatContinueRequest = {
+  user_query: string;
+};
+
+export type TChatContinueResponse = TChat;
+
+export type TChatContinue = TEndpoint<
+  TChatContinueRequest,
+  TChatContinueResponse
+>;

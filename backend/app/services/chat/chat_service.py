@@ -8,7 +8,12 @@ from utils.error_messages import GeneralErrorMessages
 from utils.prompt_templates.rag_template import RAG_TEMPLATE
 from utils.agent.chatgpt_agent import ChatGPTAgent
 from schemas.auth_schema import TokenData
-from schemas.chat_schema import ChatGenerateResponse, ChatGetResponse, ChatListResponse
+from schemas.chat_schema import (
+    ChatContinueResponse,
+    ChatGenerateResponse,
+    ChatGetResponse,
+    ChatListResponse,
+)
 
 
 class ChatService:
@@ -92,6 +97,54 @@ class ChatService:
             return ChatGenerateResponse(**chat.model_dump(by_alias=True))
         except Exception as e:
             cls.logger.error("Error generating chat: %s", e)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,
+            ) from e
+
+    @classmethod
+    async def continue_chat(
+        cls, chat_id: str, token_data: TokenData, message: str
+    ) -> ChatGenerateResponse:
+        try:
+            db = MongoDB.get_database()
+            user_repo = UserRepository(db)
+            user = await user_repo.get(token_data.user_id)
+
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=GeneralErrorMessages.NOT_FOUND,
+                )
+
+            chat_repo = ChatRepository(db)
+            chat = await chat_repo.get(chat_id)
+            if not chat or chat.created_by != token_data.user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=GeneralErrorMessages.NOT_FOUND,
+                )
+
+            gpt_agent = ChatGPTAgent(
+                model="gpt-4o",
+                system_prompt=RAG_TEMPLATE,
+                temperature=0.6,  # less variation is g
+                user_id=token_data.user_id,
+                initial_history=ChatUtils.string_to_history(chat.history),
+            )
+            await gpt_agent.generate_response(
+                message, rag=len(chat.history), partitions=user.knowledge
+            )
+
+            chat = await chat_repo.update(
+                chat_id,
+                {"history": ChatUtils.history_to_string(gpt_agent.history)},
+                {},
+            )
+
+            return ChatContinueResponse(**chat.model_dump(by_alias=True))
+        except Exception as e:
+            cls.logger.error("Error continuing chat with id %s: %s", chat_id, e)
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=GeneralErrorMessages.INTERNAL_SERVER_ERROR,

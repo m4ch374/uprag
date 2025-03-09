@@ -18,3 +18,11 @@ class ChatGenerateRequest(BaseModel):
 
 class ChatGenerateResponse(ChatModel):
     pass
+
+
+class ChatContinueRequest(BaseModel):
+    user_query: str = Field(..., description="User query")
+
+
+class ChatContinueResponse(ChatModel):
+    pass
