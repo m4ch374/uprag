@@ -7,6 +7,7 @@ import { useUser } from "@clerk/clerk-react";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import ChatPage from "./pages/ChatPage";
 import OnboardingPage from "./pages/OnboardingPage";
+import ChatPageID from "./pages/ChatPageID";
 
 // no lazy load yolo
 const App: React.FC = () => {
@@ -23,6 +24,7 @@ const App: React.FC = () => {
       <Route element={<ProtectedRoutes />}>
         <Route path="/onboard" element={<OnboardingPage />} />
         <Route path="/chat" element={<ChatPage />} />
+        <Route path="/chat/:id" element={<ChatPageID />} />
       </Route>
     </Routes>
   );

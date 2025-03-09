@@ -6,6 +6,8 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter } from "react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import "@fontsource/lato/index.css";
+
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY as string;
 
 if (!PUBLISHABLE_KEY) {
