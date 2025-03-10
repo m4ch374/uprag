@@ -127,10 +127,9 @@ class PineconeDB(VectorDB):
             docs = []
             for res in reranked_results.data:
                 metadata = res.document["metadata"]
-                if self._text_key in metadata:
-                    text = res.document[self._text_key]
-                    score = res.score
-                    docs.append((text, metadata, score))
+                text = res.document[self._text_key]
+                score = res.score
+                docs.append((text, metadata, score))
 
             return docs
 

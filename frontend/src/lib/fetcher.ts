@@ -25,7 +25,8 @@ type ContentType =
   | "application/ld+json"
   | "application/xml"
   | "application/zip"
-  | "application/x-www-form-urlencoded";
+  | "application/x-www-form-urlencoded"
+  | "multipart/form-data";
 
 class Fetcher<T extends TEndpoint<unknown, unknown>> {
   private instance: AxiosInstance;

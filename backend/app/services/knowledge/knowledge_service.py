@@ -47,11 +47,9 @@ class KnowledgeService:
                 }
             )
 
-            res = await parser.generate_contextual_chunks()
+            res = await parser.generate_chunks()
 
-            texts = [
-                elem.get("context") for elem in res["elements"] if elem.get("context")
-            ]
+            texts = [elem.get("text") for elem in res["elements"] if elem.get("text")]
             for i, text in enumerate(texts):
                 if i:
                     cls.logger.info("=========================\n")

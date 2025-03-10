@@ -1,5 +1,6 @@
 # pylint: disable=attribute-defined-outside-init
 from io import BytesIO
+import logging
 import os
 from pathlib import Path
 from typing import List, Optional
@@ -17,6 +18,7 @@ from utils.prompt_templates.contextual_chunking import CONTEXTUAL_CHUNK_TEMPLATE
 
 # pylint: disable=too-many-instance-attributes
 class UnstructuredDocumentParser(DocumentParser):
+    logger = logging.getLogger(__name__)
     unstructured_api_key: str = os.environ["UNSTRUCTURED_API_KEY"]
     unstructured_server_url: str = "https://api.unstructured.io/general/v0/general"
 
@@ -55,25 +57,27 @@ class UnstructuredDocumentParser(DocumentParser):
 
     async def generate_chunks(self):
         await self.file.seek(0)
-        return await self.client.general.partition_async(
-            request={
-                "partition_parameters": {
-                    "files": {
-                        "content": BytesIO(await self.file.read()).read(),
-                        "file_name": self.file_name,
-                        "content_type": self.file_type,
-                    },
-                    "strategy": shared.Strategy.HI_RES,
-                    "chunking_strategy": "by_title",  # why did enum for chunk strategy disappear :(
-                    "overlap": self.chunk_overlap,
-                    "max_characters": self.chunk_size,
+        return dict(
+            await self.client.general.partition_async(
+                request={
+                    "partition_parameters": {
+                        "files": {
+                            "content": BytesIO(await self.file.read()).read(),
+                            "file_name": self.file_name,
+                            "content_type": self.file_type,
+                        },
+                        "strategy": shared.Strategy.HI_RES,
+                        "chunking_strategy": "by_title",  # why did enum for chunk strategy disappear :(
+                        "overlap": self.chunk_overlap,
+                        "max_characters": self.chunk_size,
+                    }
                 }
-            }
+            )
         )
 
     # an implementation of Anthropic's Contextual Chunking
     async def generate_contextual_chunks(self):
-        chunks = dict(await self.generate_chunks())
+        chunks = await self.generate_chunks()
         await self.file.seek(0)  # reset just in case
 
         chunk_texts = [
@@ -89,7 +93,7 @@ class UnstructuredDocumentParser(DocumentParser):
 
             contextualized_chunk = await gpt_agent.generate_response(chunk)
 
-            chunks["elements"][i]["context"] = (
+            chunks["elements"][i]["text"] = (
                 contextualized_chunk.choices[0].message.content
                 + chunks["elements"][i]["text"]
             )
