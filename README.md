@@ -1,6 +1,12 @@
 # :robot: Uprag
 RAG up, not down
 
+> :warning: tl;dr; use `uprag.henrywan.dev`
+>
+> If prompted with verification email use `424242`
+>
+> The deployed instance is only 512MB of ram with 0.1 cpu, so dont stress it :(
+
 ## :rocket: Quick start
 
 ### Frontend
@@ -78,7 +84,7 @@ You can then access the following:
 ### RAG Agent Architecture
 ![RAG Agent Architecture](./asset/RAGitecture.png)
 
-> :warning: Contextual Pre-processing is currently disabled, since I get rate limited
+> :warning: Contextual Pre-processing is currently disabled, since I get rate limited. To enable it, change line 50 of `knowledge_service.py` to `res = await parser.generate_contextual_chunks()`
 
 #### Details
 * The Document is chunked by Unstructured, with parameter `chunk_overlap=36` and `chunk_size=512`.
