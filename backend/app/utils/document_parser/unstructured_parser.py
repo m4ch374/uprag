@@ -7,10 +7,12 @@ from typing import List, Optional
 from fastapi import UploadFile
 import unstructured_client
 from unstructured_client.models import shared
+from utils.agent.chatgpt_agent import ChatGPTAgent
 from utils.document_parser.document_parser import (
     DEFAULT_ACCEPTED_FILE_TYPES,
     DocumentParser,
 )
+from utils.prompt_templates.contextual_chunking import CONTEXTUAL_CHUNK_TEMPLATE
 
 
 # pylint: disable=too-many-instance-attributes
@@ -23,15 +25,15 @@ class UnstructuredDocumentParser(DocumentParser):
         server_url=unstructured_server_url,
     )
 
-    chunk_overlap: int = 100
-    chunk_size: int = 500
+    chunk_overlap: int = 36
+    chunk_size: int = 512
 
     @staticmethod
     async def parse(
         file: UploadFile,
         accepted_file_types: Optional[List[str]] = None,
-        chunk_overlap: int = 100,
-        chunk_size: int = 500,
+        chunk_overlap: int = chunk_overlap,
+        chunk_size: int = chunk_size,
     ):
         parser = UnstructuredDocumentParser()
         parser.file = file
@@ -63,8 +65,33 @@ class UnstructuredDocumentParser(DocumentParser):
                     },
                     "strategy": shared.Strategy.HI_RES,
                     "chunking_strategy": "by_title",  # why did enum for chunk strategy disappear :(
-                    "overlap": 100,
-                    "max_characters": 500,
+                    "overlap": self.chunk_overlap,
+                    "max_characters": self.chunk_size,
                 }
             }
         )
+
+    # an implementation of Anthropic's Contextual Chunking
+    async def generate_contextual_chunks(self):
+        chunks = dict(await self.generate_chunks())
+        await self.file.seek(0)  # reset just in case
+
+        chunk_texts = [
+            elem.get("text") for elem in chunks["elements"] if elem.get("text")
+        ]
+        whole_document = "\n".join(chunk_texts)
+
+        for i, chunk in enumerate(chunk_texts):
+            gpt_agent = ChatGPTAgent(
+                model="gpt-4o",
+                system_prompt=CONTEXTUAL_CHUNK_TEMPLATE(whole_document, chunk),
+            )
+
+            contextualized_chunk = await gpt_agent.generate_response(chunk)
+
+            chunks["elements"][i]["context"] = (
+                contextualized_chunk.choices[0].message.content
+                + chunks["elements"][i]["text"]
+            )
+
+        return chunks

@@ -4,6 +4,7 @@ import uuid
 from typing import Iterable, List, Optional, Tuple
 
 from pinecone import PineconeAsyncio, ServerlessSpec
+from pinecone_text.sparse import BM25Encoder
 
 from vector_db.vector_db import VectorDB
 
@@ -27,11 +28,11 @@ class PineconeDB(VectorDB):
             if await db_instance.has_index(name):
                 return
 
-            # 1536 is the default dimension for the text-embedding-3-small model
+            # 3072 is the default dimension for the text-embedding-3-large model
             await db_instance.create_index(
                 name=name,
-                dimension=dimension or 1536,
-                metric="cosine",
+                dimension=dimension or 3072,
+                metric="dotproduct",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
 
@@ -50,7 +51,20 @@ class PineconeDB(VectorDB):
             embedding = await self.create_openai_embedding(text)
             metadata = metadatas[i] if metadatas else {}
             metadata[self._text_key] = text
-            docs.append({"id": ids[i], "values": embedding, "metadata": metadata})
+
+            sparse_embedding = BM25Encoder.default().encode_documents(text)
+
+            docs.append(
+                {
+                    "id": ids[i],
+                    "values": embedding,
+                    "sparse_values": {
+                        "indices": sparse_embedding["indices"],
+                        "values": sparse_embedding["values"],
+                    },
+                    "metadata": metadata,
+                }
+            )
 
         # upsert to Pinecone
         async with self.db_instance as pc:
@@ -61,7 +75,7 @@ class PineconeDB(VectorDB):
 
         return ids
 
-    async def search(
+    async def search(  # pylint: disable=too-many-locals
         self,
         query: str,
         search_filter: Optional[dict] = None,
@@ -73,7 +87,7 @@ class PineconeDB(VectorDB):
         Output: (Retrieved text, metadata, score)
         """
         query_obj = await self.create_openai_embedding(query)
-        docs = []
+        query_obj_sparse = BM25Encoder.default().encode_queries(query)
 
         async with self.db_instance as pc:
             host = await pc.describe_index(self.index_name)
@@ -81,27 +95,44 @@ class PineconeDB(VectorDB):
 
             results = await index.query_namespaces(
                 vector=query_obj,
-                metric="cosine",
+                sparse_vector=query_obj_sparse,
+                metric="dotproduct",
                 namespaces=partitions,
-                top_k=7,
+                top_k=20,  # maybe a bit too much but idk
                 include_metadata=True,
                 include_values=False,
                 show_progress=False,
                 filter=search_filter,
+                alpha=0.75,
             )
 
-        for res in results["matches"]:
-            metadata = res["metadata"]
-            if self._text_key in metadata:
-                text = metadata.pop(self._text_key)
-                score = res["score"]
-                docs.append((text, metadata, score))
-            else:
-                logger.warning(
-                    "Found document with no `%s` key. Skipping.", self._text_key
-                )
+            documents = []
+            for result in results["matches"]:
+                metadata = result["metadata"]
+                if self._text_key in metadata:
+                    text = metadata.pop(self._text_key)
+                    documents.append(
+                        {self._text_key: text, "id": result["id"], "metadata": metadata}
+                    )
 
-        return docs
+            reranked_results = await pc.inference.rerank(
+                model="bge-reranker-v2-m3",
+                query=query,
+                documents=documents,
+                top_n=10,
+                return_documents=True,
+                rank_fields=[self._text_key],
+            )
+
+            docs = []
+            for res in reranked_results.data:
+                metadata = res.document["metadata"]
+                if self._text_key in metadata:
+                    text = res.document[self._text_key]
+                    score = res.score
+                    docs.append((text, metadata, score))
+
+            return docs
 
     async def remove_by_partition(self, partition: str):
         async with self.db_instance as pc:
