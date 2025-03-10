@@ -8,6 +8,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 import ChatPage from "./pages/ChatPage";
 import OnboardingPage from "./pages/OnboardingPage";
 import ChatPageID from "./pages/ChatPageID";
+import KnowledgePage from "./pages/KnowledgePage";
 
 // no lazy load yolo
 const App: React.FC = () => {
@@ -25,6 +26,7 @@ const App: React.FC = () => {
         <Route path="/onboard" element={<OnboardingPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/chat/:id" element={<ChatPageID />} />
+        <Route path="/knowledge" element={<KnowledgePage />} />
       </Route>
     </Routes>
   );

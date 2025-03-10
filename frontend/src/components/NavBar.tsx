@@ -1,23 +1,27 @@
 import React, { ReactNode } from "react";
 import { Book, BookOpenText, Bot, ChevronsUpDown } from "lucide-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
+import { useNavigate } from "react-router";
 
 const NavBarItem: React.FC<{ children: ReactNode; href: string }> = ({
   children,
   href,
 }) => {
+  const navigate = useNavigate();
+
   return (
-    <a
+    <button
+      onClick={() => navigate(href)}
       className="font-semibold flex gap-2 items-center text-neutral-700 cursor-pointer"
-      href={href}
     >
       {children}
-    </a>
+    </button>
   );
 };
 
 const NavBar: React.FC = () => {
   const { user } = useUser();
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col justify-between pt-4 h-full min-w-64">
@@ -27,12 +31,12 @@ const NavBar: React.FC = () => {
           <h1>Uprag</h1>
         </div>
 
-        <a
-          className="ml-4 my-4 rounded-full border border-slate-400 bg-neutral-200 p-1.5 px-4 font-semibold text-neutral-500 transition-colors duration-500 hover:border-emerald-500 hover:text-neutral-600"
-          href="/chat"
+        <button
+          className="ml-4 my-4 rounded-full border border-slate-400 bg-neutral-200 p-1.5 px-4 font-semibold text-neutral-500 transition-colors duration-500 hover:border-emerald-500 hover:text-neutral-600 text-left"
+          onClick={() => navigate("/chat")}
         >
           Ask a new question
-        </a>
+        </button>
 
         <ul className="flex flex-col mt-4 w-full px-4 gap-2">
           <NavBarItem href="/chat">
