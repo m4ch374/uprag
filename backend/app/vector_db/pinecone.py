@@ -58,7 +58,10 @@ class PineconeDB(VectorDB):
                 {
                     "id": ids[i],
                     "values": embedding,
-                    "sparse_values": sparse_embedding,
+                    "sparse_values": {
+                        "indices": sparse_embedding["indices"],
+                        "values": sparse_embedding["values"],
+                    },
                     "metadata": metadata,
                 }
             )
