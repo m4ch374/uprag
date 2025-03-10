@@ -1,6 +1,8 @@
 # :robot: Uprag
 RAG up, not down
 
+> :warning: tl;dr; use `uprag.henrywan.dev`
+
 ## :rocket: Quick start
 
 ### Frontend
