@@ -1,7 +1,8 @@
 import os
 import logging
-
 from contextlib import asynccontextmanager
+
+import nltk
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -22,6 +23,12 @@ async def lifespan(_: FastAPI):
     try:
         logger.info("starting server")
         MongoDB.initialize(os.environ["MONGODB_URL"], os.environ["MONGODB_DB_NAME"])
+        current_path = os.getcwd()
+        nltk_path = os.path.join(current_path, "nltk_data")
+        nltk.data.path.append(nltk_path)
+        nltk.data.find("tokenizers/punkt", paths=[nltk_path])
+        nltk.data.find("corpora/stopwords", paths=[nltk_path])
+
         yield
         logger.info("stopping server")
     except Exception as e:
