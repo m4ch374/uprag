@@ -26,6 +26,9 @@ class Agent:
     def __generate_initial_history__(self):
         raise NotImplementedError("Not implemented")
 
+    def clear_history(self):
+        self.history = self.__generate_initial_history__()
+
     async def generate_chat_response(self, user_query: str):
         raise NotImplementedError("Not implemented")
 

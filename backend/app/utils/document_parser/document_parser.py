@@ -47,3 +47,6 @@ class DocumentParser:
 
     async def generate_chunks(self):
         raise NotImplementedError("not implemented")
+
+    async def generate_contextual_chunks(self):
+        raise NotImplementedError("not implemented")

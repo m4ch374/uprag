@@ -47,9 +47,11 @@ class KnowledgeService:
                 }
             )
 
-            res = await parser.generate_chunks()
+            res = await parser.generate_contextual_chunks()
 
-            texts = [elem.get("text") for elem in res.elements if elem.get("text")]
+            texts = [
+                elem.get("context") for elem in res["elements"] if elem.get("context")
+            ]
             for i, text in enumerate(texts):
                 if i:
                     cls.logger.info("=========================\n")
@@ -132,6 +134,7 @@ class KnowledgeService:
                     chat_repo.update(
                         chat.id,
                         {"knowledge": [k for k in chat.knowledge if k != knowledge_id]},
+                        {},
                     )
                 )
 
