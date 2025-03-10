@@ -72,7 +72,7 @@ class PineconeDB(VectorDB):
 
         return ids
 
-    async def search(
+    async def search(  # pylint: disable=too-many-locals
         self,
         query: str,
         search_filter: Optional[dict] = None,
@@ -86,8 +86,6 @@ class PineconeDB(VectorDB):
         query_obj = await self.create_openai_embedding(query)
         query_obj_sparse = BM25Encoder.default().encode_queries(query)
 
-        docs = []
-
         async with self.db_instance as pc:
             host = await pc.describe_index(self.index_name)
             index = pc.IndexAsyncio(host["host"])
@@ -97,7 +95,7 @@ class PineconeDB(VectorDB):
                 sparse_vector=query_obj_sparse,
                 metric="dotproduct",
                 namespaces=partitions,
-                top_k=30,  # maybe a bit too much but idk
+                top_k=20,  # maybe a bit too much but idk
                 include_metadata=True,
                 include_values=False,
                 show_progress=False,
@@ -105,18 +103,33 @@ class PineconeDB(VectorDB):
                 alpha=0.75,
             )
 
-        for res in results["matches"]:
-            metadata = res["metadata"]
-            if self._text_key in metadata:
-                text = metadata.pop(self._text_key)
-                score = res["score"]
-                docs.append((text, metadata, score))
-            else:
-                logger.warning(
-                    "Found document with no `%s` key. Skipping.", self._text_key
-                )
+            documents = []
+            for result in results["matches"]:
+                metadata = result["metadata"]
+                if self._text_key in metadata:
+                    text = metadata.pop(self._text_key)
+                    documents.append(
+                        {self._text_key: text, "id": result["id"], "metadata": metadata}
+                    )
 
-        return docs
+            reranked_results = await pc.inference.rerank(
+                model="bge-reranker-v2-m3",
+                query=query,
+                documents=documents,
+                top_n=10,
+                return_documents=True,
+                rank_fields=[self._text_key],
+            )
+
+            docs = []
+            for res in reranked_results.data:
+                metadata = res.document["metadata"]
+                if self._text_key in metadata:
+                    text = res.document[self._text_key]
+                    score = res.score
+                    docs.append((text, metadata, score))
+
+            return docs
 
     async def remove_by_partition(self, partition: str):
         async with self.db_instance as pc:
