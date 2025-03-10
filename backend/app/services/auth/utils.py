@@ -33,6 +33,7 @@ class AuthUtils:
                 credentials.credentials,
                 os.environ["CLERK_JWKS_PUBLIC_KEY"],
                 ["RS256"],
+                leeway=60,
             )
             return TokenData(**decoded)
 
