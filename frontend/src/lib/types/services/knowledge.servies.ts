@@ -18,3 +18,24 @@ export type TKnowledgeListResonse = {
 };
 
 export type TKnowledgeList = TEndpoint<void, TKnowledgeListResonse>;
+
+// ===========================
+// POST /knowledge
+// ===========================
+
+export type TKnowledgeCreateRequest = FormData;
+
+export type TKnowledgeCreateResponse = TKnowledge;
+
+export type TKnowledgeCreate = TEndpoint<
+  TKnowledgeCreateRequest,
+  TKnowledgeCreateResponse
+>;
+
+// ===========================
+// POST /knowledge/:id
+// ===========================
+
+export type TKnowledgeDeleteResponse = { success: true };
+
+export type TKnowledgeDelete = TEndpoint<void, TKnowledgeDeleteResponse>;
