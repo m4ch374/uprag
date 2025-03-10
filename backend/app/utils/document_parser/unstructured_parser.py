@@ -23,15 +23,15 @@ class UnstructuredDocumentParser(DocumentParser):
         server_url=unstructured_server_url,
     )
 
-    chunk_overlap: int = 100
-    chunk_size: int = 500
+    chunk_overlap: int = 36
+    chunk_size: int = 512
 
     @staticmethod
     async def parse(
         file: UploadFile,
         accepted_file_types: Optional[List[str]] = None,
-        chunk_overlap: int = 100,
-        chunk_size: int = 500,
+        chunk_overlap: int = chunk_overlap,
+        chunk_size: int = chunk_size,
     ):
         parser = UnstructuredDocumentParser()
         parser.file = file
@@ -63,8 +63,8 @@ class UnstructuredDocumentParser(DocumentParser):
                     },
                     "strategy": shared.Strategy.HI_RES,
                     "chunking_strategy": "by_title",  # why did enum for chunk strategy disappear :(
-                    "overlap": 100,
-                    "max_characters": 500,
+                    "overlap": self.chunk_overlap,
+                    "max_characters": self.chunk_size,
                 }
             }
         )
