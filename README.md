@@ -84,7 +84,7 @@ You can then access the following:
 ### RAG Agent Architecture
 ![RAG Agent Architecture](./asset/RAGitecture.png)
 
-> :warning: Contextual Pre-processing is currently disabled, since I get rate limited
+> :warning: Contextual Pre-processing is currently disabled, since I get rate limited. To enable it, change line 50 of `knowledge_service.py` to `res = await parser.generate_contextual_chunks()`
 
 #### Details
 * The Document is chunked by Unstructured, with parameter `chunk_overlap=36` and `chunk_size=512`.
