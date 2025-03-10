@@ -25,7 +25,7 @@ const DocumentSelector: React.FC<{
   );
 
   return (
-    <div className="flex gap-2 items-center">
+    <div className="flex gap-2 items-center flex-wrap">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger>
           <FilePlus className="mt-0.5 size-6 stroke-neutral-500 cursor-pointer" />
