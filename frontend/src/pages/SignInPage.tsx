@@ -4,7 +4,7 @@ import React from "react";
 const SignInPage: React.FC = () => {
   return (
     <div className="w-full h-screen flex justify-center items-center">
-      <SignIn signUpUrl="/sign-up" forceRedirectUrl={"/onboard"} />;
+      <SignIn signUpUrl="/sign-up" forceRedirectUrl={"/"} />;
     </div>
   );
 };
