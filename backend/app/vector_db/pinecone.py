@@ -4,6 +4,7 @@ import uuid
 from typing import Iterable, List, Optional, Tuple
 
 from pinecone import PineconeAsyncio, ServerlessSpec
+from pinecone_text.sparse import BM25Encoder
 
 from vector_db.vector_db import VectorDB
 
@@ -31,7 +32,7 @@ class PineconeDB(VectorDB):
             await db_instance.create_index(
                 name=name,
                 dimension=dimension or 3072,
-                metric="cosine",
+                metric="dotproduct",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )
 
@@ -50,7 +51,17 @@ class PineconeDB(VectorDB):
             embedding = await self.create_openai_embedding(text)
             metadata = metadatas[i] if metadatas else {}
             metadata[self._text_key] = text
-            docs.append({"id": ids[i], "values": embedding, "metadata": metadata})
+
+            sparse_embedding = BM25Encoder.default().encode_documents(text)
+
+            docs.append(
+                {
+                    "id": ids[i],
+                    "values": embedding,
+                    "sparse_values": sparse_embedding,
+                    "metadata": metadata,
+                }
+            )
 
         # upsert to Pinecone
         async with self.db_instance as pc:
@@ -73,6 +84,8 @@ class PineconeDB(VectorDB):
         Output: (Retrieved text, metadata, score)
         """
         query_obj = await self.create_openai_embedding(query)
+        query_obj_sparse = BM25Encoder.default().encode_queries(query)
+
         docs = []
 
         async with self.db_instance as pc:
@@ -81,13 +94,15 @@ class PineconeDB(VectorDB):
 
             results = await index.query_namespaces(
                 vector=query_obj,
-                metric="cosine",
+                sparse_vector=query_obj_sparse,
+                metric="dotproduct",
                 namespaces=partitions,
-                top_k=7,
+                top_k=30,  # maybe a bit too much but idk
                 include_metadata=True,
                 include_values=False,
                 show_progress=False,
                 filter=search_filter,
+                alpha=0.75,
             )
 
         for res in results["matches"]:
