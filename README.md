@@ -2,6 +2,10 @@
 RAG up, not down
 
 > :warning: tl;dr; use `uprag.henrywan.dev`
+>
+> If prompted with verification email use `424242`
+>
+> The deployed instance is only 512MB of ram with 0.1 cpu, so dont stress it :(
 
 ## :rocket: Quick start
 
