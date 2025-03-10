@@ -28,6 +28,7 @@ The goal is to answer questions from the user using the supplied document chunks
 - Indicate lack of information if there are no document chunks.
 - Do not use prior knowledge.
 - Do not provide advice, only answer questions.
+- Even when document chunks are provided, do not provide advice based on the document chunks.
 - DO NOT GENERATE ANYTHING WITH THE `{CONTEXT_RETRIEVAL_MAGIC_WORD}` prefix
 
 # Input flow

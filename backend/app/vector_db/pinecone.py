@@ -27,10 +27,10 @@ class PineconeDB(VectorDB):
             if await db_instance.has_index(name):
                 return
 
-            # 1536 is the default dimension for the text-embedding-3-small model
+            # 3072 is the default dimension for the text-embedding-3-large model
             await db_instance.create_index(
                 name=name,
-                dimension=dimension or 1536,
+                dimension=dimension or 3072,
                 metric="cosine",
                 spec=ServerlessSpec(cloud="aws", region="us-east-1"),
             )

@@ -2,7 +2,7 @@ import os
 from typing import Iterable, List, Optional, Tuple
 from openai import AsyncOpenAI
 
-DEFAULT_OPENAI_EMBEDDING_MODEL = "text-embedding-3-small"
+DEFAULT_OPENAI_EMBEDDING_MODEL = "text-embedding-3-large"
 
 
 class VectorDB:
