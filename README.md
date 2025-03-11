@@ -6,6 +6,10 @@ RAG up, not down
 > If prompted with verification email use `424242`
 >
 > The deployed instance is only 512MB of ram with 0.1 cpu, so dont stress it :(
+>
+> can be accessed with the following credentials
+> email: test+clerk_test@test.ai
+> passowrd: Password123T
 
 ## :rocket: Quick start
 
