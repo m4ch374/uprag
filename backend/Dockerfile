@@ -23,4 +23,6 @@ WORKDIR /work/app
 
 EXPOSE 8080
 
+RUN python -c "import nltk; nltk.download('punkt_tab'); nltk.download('stopwords')"
+
 CMD ["uvicorn", "main:app", "--reload", "--port", "8080", "--host", "0.0.0.0"]

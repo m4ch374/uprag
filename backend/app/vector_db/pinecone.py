@@ -47,12 +47,14 @@ class PineconeDB(VectorDB):
         docs = []
         ids = ids or [str(uuid.uuid4()) for _ in texts]
 
+        sparse_embeddings = BM25Encoder.default().encode_documents(texts)
+
         for i, text in enumerate(texts):
             embedding = await self.create_openai_embedding(text)
             metadata = metadatas[i] if metadatas else {}
             metadata[self._text_key] = text
 
-            sparse_embedding = BM25Encoder.default().encode_documents(text)
+            sparse_embedding = sparse_embeddings[i]
 
             docs.append(
                 {
